@@ -1,1 +1,0 @@
-﻿Física II - Ley de Faraday y Ley de Lenz. La fuerza electromotriz inducida en un circuito cerrado es directamente proporcional a la rapidez con que cambia en el tiempo el flujo magnético que atraviesa una superficie cualquiera con el circuito como borde. Ecuación: fem = - d(Phi)/dt. La ley de Lenz indica que la corriente inducida se opone a la causa que la produce.
