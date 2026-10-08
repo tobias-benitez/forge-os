@@ -2,18 +2,20 @@
 
 ForgeOS is an end-to-end productivity and academic management system built with **FastAPI**, the **WhatsApp Cloud API**, and **Google Gemini AI**. It pairs an interactive, gamified command deck with an autonomous 24/7 WhatsApp copilot.
 
+---
+
 ## 🏗️ Architecture
 
-```
+```mermaid
 flowchart TD
     User([User via WhatsApp]) <--> Meta[Meta Cloud API]
     Meta <--> Webhook[FastAPI Backend]
     Webhook <--> Gemini[Google Gemini AI]
     Webhook <--> DB[(SQLite Database)]
     Cron[cron-job.org] -->|Ping every 5 min| Webhook
-
 ```
 
+---
 ## ✨ Features
 
 ### 🎮 Gamified Command Deck
