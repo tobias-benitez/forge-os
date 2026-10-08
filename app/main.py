@@ -984,3 +984,19 @@ async def api_test_morning():
 async def api_test_lunch():
     await send_lunch_reminder()
     return {"status": "ok", "message": "Mensaje de almuerzo disparado a WhatsApp"}
+
+@app.get("/api/admin/reset-routine")
+async def api_reset_routine():
+    """Limpia los bloques antiguos y aplica la rutina canónica limpia."""
+    from app.services.seed_data import seed_database
+    db = SessionLocal()
+    try:
+        user = db.query(User).first()
+        if user:
+            db.query(RoutineBlock).filter(RoutineBlock.user_id == user.id).delete()
+            db.commit()
+            seed_database()
+            return {"status": "ok", "message": "Rutina sincronizada. Lista para recibir tus programas en PDF."}
+        return {"status": "error", "message": "Usuario no encontrado"}
+    finally:
+        db.close()
