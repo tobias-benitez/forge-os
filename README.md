@@ -1,12 +1,10 @@
 # ⚡ ForgeOS: Autonomous Habit & Life Management Engine
 
-ForgeOS is an end-to-end productivity and academic management system built with FastAPI, WhatsApp Cloud API, and Google Gemini AI. It combines a gamified command deck with an autonomous WhatsApp copilot.
-
----
+ForgeOS is an end-to-end productivity and academic management system built with **FastAPI**, the **WhatsApp Cloud API**, and **Google Gemini AI**. It pairs an interactive, gamified command deck with an autonomous 24/7 WhatsApp copilot.
 
 ## 🏗️ Architecture
 
-```mermaid
+```
 flowchart TD
     User([User via WhatsApp]) <--> Meta[Meta Cloud API]
     Meta <--> Webhook[FastAPI Backend]
@@ -14,97 +12,132 @@ flowchart TD
     Webhook <--> DB[(SQLite Database)]
     Cron[cron-job.org] -->|Ping every 5 min| Webhook
 
----
+```
 
-### ✨Features
-Gamified Command Deck:
+## ✨ Features
 
-Real-time XP progression, leveling, and attribute radar (Intellect, Vitality, Spirit, Leadership).
+### 🎮 Gamified Command Deck
 
-Habit tracking: prayer, reading, hydration, and nutrition logs.
+* **Attribute System:** Real-time XP progression, leveling, and an attribute radar covering *Intellect*, *Vitality*, *Spirit*, and *Leadership*.
 
-Day-specific routine views and syllabus milestones.
+* **Habit Tracking:** Dedicated logs for prayer, reading, hydration, and nutrition.
 
-Autonomous 24/7 WhatsApp Agent:
+* **Academic Milestones:** Day-specific routine views and syllabus deadline monitoring.
 
-Morning Briefing (07:15): Daily scripture, stoic quote, and chronological mission schedule.
+### 🤖 Autonomous 24/7 WhatsApp Agent
 
-Smart Lunch Video (13:00): High-yield educational videos fetched dynamically from YouTube playlists.
+* **Morning Briefing (07:15):** Daily scripture, stoic reflection, and a chronological agenda for the day.
 
-Routine Radar: Proactive alerts dispatched 15 minutes before study blocks, workouts, or classes.
+* **Smart Lunch Video (13:00):** High-yield educational videos fetched dynamically from curated YouTube playlists.
 
-Night Audit (22:30): End-of-day review and gratitude journal with repetition prevention.
+* **Routine Radar:** Proactive reminders dispatched 15 minutes before study blocks, workouts, or classes.
 
-On-the-fly Updates: Change your lunch playlist instantly by texting playlist <youtube_url>.
+* **Night Audit (22:30):** End-of-day review and gratitude journal featuring repetition prevention.
 
-Academic & Syllabus Planner:
+* **On-the-fly Updates:** Update your lunch playlist instantly by texting `playlist <youtube_url>`.
 
-PDF parser to extract exam dates, units, and weekly study plans.
+### 📚 Academic & Syllabus Planner
 
-DEFCON 1 exam countdown alert system.
+* **Automated Ingestion:** PDF parser that extracts exam dates, units, and weekly study plans.
 
-Adaptive Rescheduling:
+* **DEFCON 1 Countdown:** Escalating alert system for approaching high-stakes exams.
 
-Dynamic schedule reorganization via voice note or text message upon unexpected delays.
+### 🔄 Adaptive Rescheduling
 
-🛠️ Tech Stack
-Backend: Python 3.11+, FastAPI, Uvicorn
+* **Dynamic Restructuring:** Automatically recalculates your daily schedule via voice note or text message whenever unexpected delays occur.
 
-Database: SQLAlchemy, SQLite
+## 🛠️ Tech Stack
 
-Frontend: Jinja2 Templates, Tailwind CSS, Lucide Icons
+| **Domain** | **Technologies** | 
+| **Backend** | Python 3.11+, FastAPI, Uvicorn | 
+| **Database** | SQLAlchemy, SQLite | 
+| **Frontend** | Jinja2 Templates, Tailwind CSS, Lucide Icons | 
+| **AI & APIs** | Meta WhatsApp Cloud API, Google Generative AI (Gemini) | 
+| **Automation** | APScheduler, External Cron Heartbeat | 
 
-APIs: Meta WhatsApp Cloud API, Google Generative AI (Gemini)
+## ⚙️ Environment Variables
 
-Scheduler: APScheduler, External Cron Heartbeat
+Create a `.env` file in the root directory and populate it with the following configuration:
 
-⚙️ Environment Variables
-Configure your .env file using the following schema:
-
+```
 PORT=8000
 ENVIRONMENT=development
 TIMEZONE=America/Argentina/Buenos_Aires
+
+# Gemini API
 GEMINI_API_KEY=your_gemini_api_key_here
+
+# WhatsApp Cloud API
 WHATSAPP_TOKEN=your_permanent_whatsapp_token
 WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
 WHATSAPP_VERIFY_TOKEN=your_webhook_verification_token
+
+# Persistence
 DATABASE_URL=sqlite:///./forge.db
 
-🚀 Quick Start (Local)
-Clone & enter repository:
+```
 
-Bash
-git clone [https://github.com/tobias-benitez/forge-os.git](https://github.com/tobias-benitez/forge-os.git)
+## 🚀 Quick Start (Local Setup)
+
+### 1. Clone the repository
+
+```
+git clone https://github.com/tobias-benitez/forge-os.git
 cd forge-os
-Set up virtual environment:
 
-Bash
+```
+
+### 2. Set up a virtual environment
+
+```
+# Create virtual environment
 python -m venv venv
-# Windows:
+
+# Activate on Windows:
 venv\Scripts\activate
-# Linux/macOS:
+
+# Activate on Linux/macOS:
 source venv/bin/activate
-Install dependencies:
 
-Bash
+```
+
+### 3. Install dependencies
+
+```
 pip install -r requirements.txt
-Run the server:
 
-Bash
+```
+
+### 4. Run the development server
+
+```
 uvicorn app.main:app --reload
-Open http://localhost:8000/dashboard in your browser.
 
-🌐 Production Deployment (Render)
-Connect your GitHub repository to a new Render Web Service.
+```
 
-Build Command: pip install -r requirements.txt
+Access the command deck at <http://localhost:8000/dashboard>.
 
-Start Command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+## 🌐 Production Deployment (Render)
 
-Set your production environment variables in the Render dashboard.
+1. Connect your GitHub repository to a new **Web Service** on Render.
 
-Create a recurring 5-minute GET monitor on cron-job.org targeting:
-https://<your-render-domain>/api/heartbeat-cron
+2. Configure service parameters:
 
-📄 License
-MIT License. Free for educational and personal use.
+   * **Build Command:** `pip install -r requirements.txt`
+
+   * **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+3. Add your production environment variables in the Render dashboard.
+
+4. Set up an external heartbeat to prevent cold starts:
+
+   * Create a recurring 5-minute `GET` task on [cron-job.org](https://cron-job.org) targeting:
+
+     ```
+     https://<your-render-domain>/api/heartbeat-cron
+     
+     ```
+
+## 📄 License
+
+Distributed under the MIT License. Free for educational and personal use.
