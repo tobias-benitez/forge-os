@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root" class="theme-rpg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ForgeOS // RPG Command Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            rpg: ['"Cinzel"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html.theme-rpg {
+      --bg: #090a0f;
+      --card-bg: rgba(18, 20, 29, 0.92);
+      --border: rgba(212, 175, 55, 0.32);
+      --accent: #d4af37;
+      --accent-hover: #f3cf55;
+      --accent-glow: rgba(212, 175, 55, 0.35);
+      --text: #f5f0e6;
+      --text-muted: #9e9789;
+      --inner-card: rgba(8, 9, 14, 0.75);
+      --badge-bg: rgba(212, 175, 55, 0.15);
+      --btn-text: #050608;
+    }
+
+    html.theme-cyber {
+      --bg: #0b0c10;
+      --card-bg: rgba(19, 21, 28, 0.94);
+      --border: rgba(252, 238, 10, 0.40);
+      --accent: #fcee0a;
+      --accent-hover: #fff340;
+      --accent-glow: rgba(252, 238, 10, 0.35);
+      --text: #ffffff;
+      --text-muted: #8b92a4;
+      --inner-card: rgba(10, 11, 15, 0.80);
+      --badge-bg: rgba(252, 238, 10, 0.15);
+      --btn-text: #050608;
+    }
+
+    html.theme-astral {
+      --bg: #070a14;
+      --card-bg: rgba(13, 20, 38, 0.92);
+      --border: rgba(56, 189, 248, 0.35);
+      --accent: #38bdf8;
+      --accent-hover: #7dd3fc;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --text: #f0f9ff;
+      --text-muted: #7dd3fc;
+      --inner-card: rgba(6, 11, 24, 0.75);
+      --badge-bg: rgba(56, 189, 248, 0.15);
+      --btn-text: #040814;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      background-image: 
+        radial-gradient(at 0% 0%, var(--accent-glow) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 45%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      touch-action: manipulation;
+    }
+
+    .card-rpg {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.55);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-rpg:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 36px -4px var(--accent-glow);
+    }
+
+    .inner-box {
+      background: var(--inner-card);
+      border: 1px solid var(--border);
+    }
+
+    .text-sub {
+      color: var(--text-muted);
+    }
+
+    .accent-btn {
+      background: var(--accent);
+      color: var(--btn-text);
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+
+    .accent-btn:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 16px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .memento-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .memento-past {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    .memento-current {
+      background: #10b981;
+      box-shadow: 0 0 12px #10b981;
+      animation: pulse 1.5s infinite;
+    }
+
+    .memento-future {
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .memento-future:hover {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .reorder-bar {
+      display: none;
+    }
+
+    .is-reordering .reorder-bar {
+      display: flex;
+    }
+
+    .is-reordering .reorderable-card {
+      outline: 2px dashed var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen p-2 sm:p-4 md:p-6 antialiased">
+  <div class="max-w-7xl mx-auto space-y-4">
+
+    <!-- 0. TOP HUD DEL PERSONAJE (REPARADO Y ALINEADO) -->
+    <header class="card-rpg rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <!-- Emblema Heráldico de Forja (SVG Puro, sin caras) -->
+        <div class="relative flex-shrink-0">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl inner-box border-2 border-[var(--accent)] flex items-center justify-center shadow-lg bg-black/60">
+            {% if level >= 6 %}
+            <!-- Corona de Conquistador -->
+            <svg class="w-8 h-8 text-[var(--accent)]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+            </svg>
+            {% elif level >= 3 %}
+            <!-- Espadas Cruzadas de Guerrero -->
+            <svg class="w-8 h-8 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.5 17.5L3 6V3h3l11.5 11.5m-5-8.5L21 3v3l-8.5 8.5M6 18l-3 3m18 0l-3-3"/>
+            </svg>
+            {% else %}
+            <!-- Yunque y Martillo de Forjador Novato -->
+            <svg class="w-8 h-8 text-[var(--accent)]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2 7h20v3H2V7m4 4h12l-2 7H8l-2-7m2 8h8v2H8v-2z"/>
+            </svg>
+            {% endif %}
+          </div>
+          <span class="absolute -bottom-1 -right-1 bg-[var(--accent)] text-black text-[9px] font-mono font-black px-1.5 py-0.5 rounded shadow">
+            LVL {{ level }}
+          </span>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-black tracking-tight font-rpg text-white">{{ user.name or 'Tobías' }}</h1>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--badge-bg)] text-[var(--accent)] border border-[var(--border)]">
+              {{ rank_title }}
+            </span>
+          </div>
+          <p class="text-xs text-sub mt-0.5 font-mono">Clase: Ingeniero & Forjador de Hábitos</p>
+        </div>
+      </div>
+
+      <!-- Barra de Maná / XP -->
+      <div class="w-full md:w-64 space-y-1">
+        <div class="flex justify-between text-[11px] font-mono">
+          <span class="text-sub">PROGRESO PARA LEVEL {{ level + 1 }}</span>
+          <span class="font-bold text-[var(--accent)]">{{ xp_current_level }} / 500 XP</span>
+        </div>
+        <div class="w-full inner-box h-2.5 rounded-full overflow-hidden p-0.5">
+          <div class="h-full bg-[var(--accent)] rounded-full transition-all duration-700 shadow-[0_0_8px_var(--accent)]" style="width: {{ xp_percent }}%;"></div>
+        </div>
+      </div>
+
+      <!-- Botones de Tema y Ajuste -->
+      <div class="flex items-center gap-2 text-xs font-mono ml-auto md:ml-0">
+        <div class="flex items-center gap-1 inner-box p-1 rounded-xl">
+          <button onclick="setTheme('theme-rpg')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Elden RPG">⚔️</button>
+          <button onclick="setTheme('theme-cyber')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Cyberpunk">🦾</button>
+          <button onclick="setTheme('theme-astral')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Astral Void">🌌</button>
+        </div>
+
+        <button onclick="toggleReorderMode()" id="btn-reorder" class="inner-box px-3 py-1.5 rounded-xl hover:border-[var(--accent)] transition flex items-center gap-1.5">
+          <span>✏️ Ajustar</span>
+        </button>
+      </div>
+    </header>
+
+      <!-- Barra de Experiencia -->
+      <div class="w-full sm:w-56 md:w-64 space-y-1">
+        <div class="flex justify-between text-[11px] font-mono">
+          <span class="text-sub">PROGRESO PARA SUBIR A LVL {{ level + 1 }}</span>
+          <span class="font-bold text-[var(--accent)]">{{ xp_current_level }} / 500 XP</span>
+        </div>
+        <div class="w-full inner-box h-2.5 rounded-full overflow-hidden p-0.5">
+          <div class="h-full bg-[var(--accent)] rounded-full transition-all duration-700 shadow-[0_0_8px_var(--accent)]" style="width: {{ xp_percent }}%;"></div>
+        </div>
+      </div>
+
+      <!-- Controles: Temas y Edición -->
+      <div class="flex items-center gap-2.5 text-xs font-mono ml-auto">
+        <div class="flex items-center gap-1 inner-box p-1 rounded-xl">
+          <button onclick="setTheme('theme-rpg')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Elden RPG">⚔️</button>
+          <button onclick="setTheme('theme-cyber')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Cyberpunk">🦾</button>
+          <button onclick="setTheme('theme-astral')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition" title="Astral Void">🌌</button>
+        </div>
+
+        <button onclick="toggleReorderMode()" id="btn-reorder" class="inner-box px-3 py-1.5 rounded-xl hover:border-[var(--accent)] transition flex items-center gap-1.5">
+          <span>✏️ Ajustar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ALERTA DEFCON 1 -->
+    {% if defcon1_active %}
+    <div class="bg-rose-950/60 border-2 border-rose-500 rounded-2xl p-4 flex justify-between items-center animate-pulse">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🚨</span>
+        <div>
+          <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-rose-300">DEFCON 1: EXAMEN INMINENTE ({{ defcon1_subject }})</h2>
+          <p class="text-xs text-rose-200">Faltan menos de 7 días. El estudio de esta materia suma 1.5x XP. Ocio restringido.</p>
+        </div>
+      </div>
+      <span class="text-xs font-mono font-bold bg-rose-600 text-white px-3 py-1 rounded-lg">FOCO TOTAL</span>
+    </div>
+    {% endif %}
+
+    <!-- LAYOUT VERTICAL CON RAIL LATERAL -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- COLUMNA PRINCIPAL (8 COLS) -->
+      <main class="lg:col-span-8 space-y-4" id="main-vertical-stack">
+
+        <<!-- BLOQUE A: SABIDURÍA & FE (DINÁMICO) -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 reorderable-card space-y-3" id="card-wisdom">
+          <div class="reorder-bar justify-between items-center text-[10px] font-mono pb-2 border-b border-inherit">
+            <span class="text-[var(--accent)] font-bold">MÓDULO: SABIDURÍA & FE</span>
+            <div class="flex gap-1">
+              <button onclick="moveCard('card-wisdom', -1)" class="inner-box px-2 py-0.5 rounded">▲ Subir</button>
+              <button onclick="moveCard('card-wisdom', 1)" class="inner-box px-2 py-0.5 rounded">▼ Bajar</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="inner-box p-4 rounded-xl space-y-1.5">
+              <span class="text-xs font-mono text-cyan-400 font-bold uppercase block">🏛️ {{ daily_quote.author }} ({{ daily_quote.work }})</span>
+              <p class="text-sm sm:text-base leading-relaxed text-slate-100">"{{ daily_quote.text }}"</p>
+            </div>
+
+            <div class="inner-box p-4 rounded-xl space-y-1.5">
+              <span class="text-xs font-mono text-[var(--accent)] font-bold uppercase block">✝️ {{ daily_verse.ref }}</span>
+              <p class="text-sm sm:text-base leading-relaxed text-slate-100">"{{ daily_verse.text }}"</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- BLOQUE B: RUTINA DEL DÍA -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 reorderable-card space-y-3.5" id="card-routine">
+          <div class="reorder-bar justify-between items-center text-[10px] font-mono pb-2 border-b border-inherit">
+            <span class="text-[var(--accent)] font-bold">MÓDULO: RUTINA DEL DÍA</span>
+            <div class="flex gap-1">
+              <button onclick="moveCard('card-routine', -1)" class="inner-box px-2 py-0.5 rounded">▲ Subir</button>
+              <button onclick="moveCard('card-routine', 1)" class="inner-box px-2 py-0.5 rounded">▼ Bajar</button>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center border-b border-inherit pb-2.5">
+            <div>
+              <h2 class="text-sm font-bold font-mono uppercase tracking-wider flex items-center gap-2">
+                📋 Misiones de Hoy ({{ current_day_es }})
+              </h2>
+              <p class="text-[11px] text-sub">Tildá tus bloques a medida que los cumplís.</p>
+            </div>
+            <div class="flex items-center gap-3 inner-box px-3 py-1.5 rounded-xl text-xs font-mono">
+              <span>⭐ <strong class="text-[var(--accent)]">{{ user.xp_total }}</strong> XP</span>
+              <span class="text-sub">|</span>
+              <span>🔥 <strong class="text-orange-500">{{ user.streak_days }}D</strong></span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {% for b in blocks %}
+            {% set is_done = b.label in completed_block_labels %}
+            <div class="inner-box p-3 rounded-xl flex justify-between items-center group transition">
+              <div>
+                <span class="text-[10px] font-mono text-[var(--accent)] font-bold block">{{ b.start_time.strftime('%H:%M') }} ({{ b.duration_minutes }}m)</span>
+                <span class="text-xs font-medium {% if is_done %}line-through text-sub{% endif %}">{{ b.label }}</span>
+              </div>
+              {% if is_done %}
+              <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">✓ Hecho</span>
+              {% else %}
+              <button onclick="completeBlock('{{ b.id }}', '{{ b.label }}', '{{ b.category }}')" class="accent-btn text-[11px] font-mono px-3 py-1 rounded-lg">
+                Completar
+              </button>
+              {% endif %}
+            </div>
+            {% else %}
+            <p class="text-xs text-sub italic">Sin bloques de rutina programados para hoy.</p>
+            {% endfor %}
+          </div>
+
+          <!-- Acción Extra -->
+          <div class="pt-3 border-t border-inherit space-y-2">
+            <span class="text-[11px] font-mono text-sub uppercase block">⚡ ¿Hiciste algo fuera de rutina?</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="action-title" placeholder="Ej: Resolví 4 ejercicios de inductancia..." class="sm:col-span-2 inner-box rounded-xl px-3 py-2 text-xs font-mono focus:outline-none">
+              <select id="action-type" class="inner-box text-xs font-mono px-2 py-2 rounded-xl">
+                <option value="study_1h">1h Estudio Foco (+60/+100 XP)</option>
+                <option value="help_friend">🤝 Enseñar a un amigo (+90 XP)</option>
+                <option value="leadership">🗣️ Liderazgo / Soft Skills (+75 XP)</option>
+                <option value="workout">💪 Entrenamiento (+80 XP)</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="action-expl" placeholder="Explicá en 1 oración qué aprendiste (Duplica tu XP ganado)..." class="flex-1 inner-box rounded-xl px-3 py-2 text-xs font-mono focus:outline-none">
+              <button onclick="submitActionWithProof()" class="accent-btn px-4 py-2 rounded-xl text-xs font-mono whitespace-nowrap">
+                ⚡ Validar (+XP)
+              </button>
+            </div>
+          </div>
+        </section>
+<!-- BLOQUE C: HÁBITOS DE VIDA -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 reorderable-card space-y-3.5" id="card-habits">
+          <div class="reorder-bar justify-between items-center text-[10px] font-mono pb-2 border-b border-inherit">
+            <span class="text-[var(--accent)] font-bold">MÓDULO: HÁBITOS & CUERPO</span>
+            <div class="flex gap-1">
+              <button onclick="moveCard('card-habits', -1)" class="inner-box px-2 py-0.5 rounded">▲ Subir</button>
+              <button onclick="moveCard('card-habits', 1)" class="inner-box px-2 py-0.5 rounded">▼ Bajar</button>
+            </div>
+          </div>
+
+          <div class="border-b border-inherit pb-2">
+            <h2 class="text-sm font-bold font-mono uppercase tracking-wider text-[var(--accent)]">
+              🌱 Hábitos de Carácter & Físico
+            </h2>
+            <p class="text-[11px] text-sub">Consistencia diaria de bajo volumen y alto impacto.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <!-- 1. ORAR / SANTUARIO -->
+            <div class="inner-box p-3 rounded-xl flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-[var(--accent)] font-bold block">ESPÍRITU</span>
+                <h4 class="text-xs font-bold mt-1">10 min de Oración</h4>
+                <p class="text-[10px] text-sub mt-1">Gratitud y dirección a Dios.</p>
+              </div>
+              {% if checkin and checkin.prayer_done %}
+              <span class="mt-3 text-center text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 py-1.5 rounded-lg border border-emerald-500/20">✓ Cumplido (+50 XP)</span>
+              {% else %}
+              <button onclick="completeHabit('prayer')" class="mt-3 accent-btn py-1.5 rounded-lg text-xs font-mono">Orar (+50 XP)</button>
+              {% endif %}
+            </div>
+
+            <!-- 2. LECTURA (CÓMO GANAR AMIGOS) -->
+            <div class="inner-box p-3 rounded-xl flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-cyan-400 font-bold block">SOFT SKILLS</span>
+                <h4 class="text-xs font-bold mt-1">Lectura (15-20 págs)</h4>
+                <p class="text-[10px] text-sub mt-1">Cómo ganar amigos e influir...</p>
+              </div>
+              {% if checkin and checkin.reading_done %}
+              <span class="mt-3 text-center text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 py-1.5 rounded-lg border border-emerald-500/20">✓ Leído (+60 XP)</span>
+              {% else %}
+              <button onclick="completeHabit('reading')" class="mt-3 accent-btn py-1.5 rounded-lg text-xs font-mono">Leí hoy (+60 XP)</button>
+              {% endif %}
+            </div>
+
+            <!-- 3. NUTRICIÓN ATLETA -->
+            <div class="inner-box p-3 rounded-xl flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-emerald-400 font-bold block">GIMNASIO</span>
+                <h4 class="text-xs font-bold mt-1">Nutrición: {{ checkin.nutrition_score if checkin and checkin.nutrition_score > 0 else '-' }}/10</h4>
+                <p class="text-[10px] text-sub mt-1">8-10: Proteína limpia | 1-5: Libre</p>
+              </div>
+              <div class="mt-3 flex gap-1">
+                <select id="nutr-select" class="inner-box text-xs font-mono px-2 py-1 rounded-lg flex-1">
+                  <option value="10">10/10 (Impecable)</option>
+                  <option value="9">9/10 (Excelente)</option>
+                  <option value="8">8/10 (Sólido)</option>
+                  <option value="7">7/10 (Casero)</option>
+                  <option value="5">5/10 (Finde)</option>
+                </select>
+                <button onclick="submitNutr()" class="accent-btn px-2.5 py-1 rounded-lg text-xs font-mono">OK</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video formativo de acompañamiento o descanso de fin de semana -->
+          {% if is_weekend %}
+          <div class="inner-box p-3.5 rounded-xl flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-emerald-400 font-bold uppercase block">🕊️ Fin de Semana // Descanso & Familia</span>
+              <p class="text-xs sm:text-sm font-medium">Almuerzo libre en familia. Sin video formativo obligatorio hoy.</p>
+            </div>
+            <span class="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">Modo Libre</span>
+          </div>
+          {% else %}
+          <div class="inner-box p-3 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <span class="text-[10px] font-mono text-amber-400 font-bold uppercase block">🍽️ Almuerzo // Video Recomendado</span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+              <a href="{{ active_video.url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-amber-200 hover:text-[var(--accent)] underline transition">
+              {{ active_video.title }} ↗
+              </a>
+              <span class="text-sub text-[10px]">({{ active_video.channel }})</span>
+              </div>
+            </div>
+            {% if checkin and checkin.mindful_eating %}
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">✓ Visto (+45 XP)</span>
+            {% else %}
+            <button onclick="completeHabit('meal_video')" class="accent-btn py-1.5 px-3 rounded-lg text-xs font-mono whitespace-nowrap">
+              Vi el video (+45 XP)
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+
+        <!-- BLOQUE D: RADAR DE ATRIBUTOS RPG -->
+     <section class="card-rpg rounded-2xl p-4 sm:p-5 reorderable-card space-y-3.5" id="card-attributes">
+       <div class="reorder-bar justify-between items-center text-[10px] font-mono pb-2 border-b border-inherit">
+         <span class="text-[var(--accent)] font-bold">MÓDULO: ATRIBUTOS RPG</span>
+         <div class="flex gap-1">
+           <button onclick="moveCard('card-attributes', -1)" class="inner-box px-2 py-0.5 rounded">▲ Subir</button>
+           <button onclick="moveCard('card-attributes', 1)" class="inner-box px-2 py-0.5 rounded">▼ Bajar</button>
+         </div>
+       </div>
+
+       <div class="border-b border-inherit pb-2 flex justify-between items-center">
+         <div>
+           <h2 class="text-sm font-bold font-mono uppercase tracking-wider text-[var(--accent)]">⚔️ Atributos del Personaje</h2>
+           <p class="text-[11px] text-sub">Nivel de desarrollo forjado en el día de hoy.</p>
+         </div>
+         <span class="text-[10px] font-mono inner-box px-2 py-0.5 rounded text-[var(--accent)]">Status Activo</span>
+       </div>
+
+       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+         <div class="inner-box p-3 rounded-xl space-y-1">
+           <span class="text-[10px] font-mono text-cyan-400 font-bold block">🧠 INTELECTO</span>
+           <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+             <div class="h-full bg-cyan-400" style="width: {{ attributes.intellect }}%;"></div>
+           </div>
+           <span class="text-[10px] font-mono text-sub block">{{ attributes.intellect }}%</span>
+         </div>
+
+         <div class="inner-box p-3 rounded-xl space-y-1">
+           <span class="text-[10px] font-mono text-emerald-400 font-bold block">⚡ VITALIDAD</span>
+           <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+             <div class="h-full bg-emerald-400" style="width: {{ attributes.vitality }}%;"></div>
+           </div>
+           <span class="text-[10px] font-mono text-sub block">{{ attributes.vitality }}%</span>
+         </div>
+
+         <div class="inner-box p-3 rounded-xl space-y-1">
+           <span class="text-[10px] font-mono text-indigo-400 font-bold block">🕊️ ESPÍRITU</span>
+           <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+             <div class="h-full bg-indigo-400" style="width: {{ attributes.spirit }}%;"></div>
+           </div>
+           <span class="text-[10px] font-mono text-sub block">{{ attributes.spirit }}%</span>
+         </div>
+
+         <div class="inner-box p-3 rounded-xl space-y-1">
+           <span class="text-[10px] font-mono text-amber-400 font-bold block">👑 LIDERAZGO</span>
+           <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+             <div class="h-full bg-amber-400" style="width: {{ attributes.leadership }}%;"></div>
+           </div>
+           <span class="text-[10px] font-mono text-sub block">{{ attributes.leadership }}%</span>
+         </div>
+       </div>
+     </section>
+
+      </main>
+
+      <!-- ================= RAIL TÁCTICO LATERAL (4 COLS EN DESKTOP) ================= -->
+      <aside class="lg:col-span-4 space-y-4" id="sidebar-stack">
+
+        <!-- CARD LATERAL 1: CALENDARIO VITAL MEMENTO MORI -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 space-y-3" id="widget-memento">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-[var(--accent)]">⏳ Memento Mori (Año 2026)</h3>
+              <p class="text-[10px] text-sub">Cada bloque es una semana de vida.</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-mono font-bold text-emerald-400">{{ current_week }} / 52</span>
+              <span class="text-[9px] font-mono text-sub block">Vividas</span>
+            </div>
+          </div>
+
+          <!-- Matriz de 52 Semanas en Mini-Bloques Visibles -->
+          <div class="inner-box p-3 rounded-xl flex flex-wrap gap-1.5 items-center justify-start">
+            {% for i in range(1, 53) %}
+            <div 
+              class="memento-dot {% if i < current_week %}memento-past{% elif i == current_week %}memento-current{% else %}memento-future{% endif %}"
+              title="Semana {{ i }} {% if i == current_week %}(Semana Actual){% endif %}">
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- CARD LATERAL 2: PARCIALES Y HORIZONTE CRÍTICO -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 space-y-3" id="widget-exams">
+          <div class="flex justify-between items-center border-b border-inherit pb-2">
+            <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-rose-400">🚨 Próximos Parciales</h3>
+            <span class="text-[10px] font-mono text-sub">Críticos</span>
+          </div>
+
+          <div class="space-y-2">
+            {% for ev in events if ev.category.value == 'ACADEMIC' %}
+            <div class="inner-box p-2.5 rounded-xl flex justify-between items-center text-xs">
+              <div>
+                <span class="font-bold block">{{ ev.title }}</span>
+                <span class="text-[10px] font-mono text-sub">📅 {{ ev.event_date.strftime('%d/%m a las %H:%M') }}</span>
+              </div>
+              {% if 'Física' in ev.title %}
+              <span class="text-[9px] font-mono bg-rose-500/20 text-rose-400 px-1.5 py-0.5 rounded font-bold">FILTRO</span>
+              {% endif %}
+            </div>
+            {% else %}
+            <p class="text-xs text-sub italic">Sin exámenes agendados.</p>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- CARD LATERAL: MATERIAS Y SUBIDA DE ARCHIVOS -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 space-y-3" id="widget-subjects">
+          <div class="flex justify-between items-center border-b border-inherit pb-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              {% for rm in all_roadmaps %}
+              <button onclick="switchSubj('subj-{{ loop.index }}')" id="btn-subj-{{ loop.index }}" 
+                class="subj-tab-btn px-2.5 py-1 rounded-lg text-xs font-mono font-bold {% if loop.first %}bg-[var(--badge-bg)] text-[var(--accent)]{% else %}inner-box{% endif %}">
+                {{ rm.subject }}
+              </button>
+              {% endfor %}
+              <button onclick="promptNewSubject()" class="px-2 py-1 rounded-lg text-xs font-mono font-bold inner-box text-[var(--accent)] hover:bg-white/10" title="Agregar nueva cursada">
+                + Materia
+              </button>
+            </div>
+            <label class="inner-box px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer hover:border-[var(--accent)] transition">
+              <span>📎 Subir PDF</span>
+              <input type="file" onchange="uploadPdf(this)" class="hidden">
+            </label>
+          </div>
+
+          <!-- Contenido de cada materia -->
+          {% for rm in all_roadmaps %}
+          <div id="subj-{{ loop.index }}" class="subj-box {% if not loop.first %}hidden{% endif %} space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <div class="flex justify-between items-center text-[10px] font-mono text-sub px-1 mb-1">
+              <span>Meta: {{ rm.hours_per_week_target }} hs/sem</span>
+              <span>Parcial: {{ rm.exam_date }}</span>
+            </div>
+            {% for t in rm.topics %}
+            <div class="inner-box p-2 rounded-xl flex justify-between items-center text-xs">
+              <span class="text-sub truncate max-w-[180px]">{{ t.target_week }} • {{ t.title }}</span>
+              <span class="font-mono text-[var(--accent)] font-bold text-[11px]">{{ t.estimated_hours }}h</span>
+            </div>
+            {% else %}
+            <p class="text-xs text-sub italic p-2">Sin temas cargados aún para esta materia.</p>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </section>
+
+          <div id="subj-fisica" class="subj-box space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            {% for t in roadmap_fisica.topics %}
+            <div class="inner-box p-2 rounded-xl flex justify-between items-center text-xs">
+              <span class="text-sub truncate max-w-[180px]">{{ t.target_week }} • {{ t.title }}</span>
+              <span class="font-mono text-[var(--accent)] font-bold text-[11px]">{{ t.estimated_hours }}h</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div id="subj-lenguajes" class="subj-box hidden space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            {% for t in roadmap_lenguajes.topics %}
+            <div class="inner-box p-2 rounded-xl flex justify-between items-center text-xs">
+              <span class="text-sub truncate max-w-[180px]">{{ t.target_week }} • {{ t.title }}</span>
+              <span class="font-mono text-[var(--accent)] font-bold text-[11px]">{{ t.estimated_hours }}h</span>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- CARD LATERAL 4: TIENDA RPG (RATIO 2.5:1) -->
+        <section class="card-rpg rounded-2xl p-4 sm:p-5 space-y-3" id="widget-shop">
+          <div class="flex justify-between items-center border-b border-inherit pb-2">
+            <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-[var(--accent)]">🛒 Tienda de Recompensas</h3>
+            <span class="text-[10px] font-mono text-sub">2.5h : 1h</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="inner-box p-2.5 rounded-xl flex flex-col justify-between">
+              <span class="text-xs font-bold">1 Cap. Anime</span>
+              <button onclick="redeem('1 Cap Anime', 75)" class="mt-2 accent-btn py-1 rounded-lg text-[10px] font-mono">75 XP</button>
+            </div>
+            <div class="inner-box p-2.5 rounded-xl flex flex-col justify-between">
+              <span class="text-xs font-bold">1h Videojuegos</span>
+              <button onclick="redeem('1h Gaming', 150)" class="mt-2 accent-btn py-1 rounded-lg text-[10px] font-mono">150 XP</button>
+            </div>
+            <div class="inner-box p-2.5 rounded-xl flex flex-col justify-between">
+              <span class="text-xs font-bold">Comida Libre</span>
+              <button onclick="redeem('Comida Libre', 300)" class="mt-2 accent-btn py-1 rounded-lg text-[10px] font-mono">300 XP</button>
+            </div>
+            <div class="inner-box p-2.5 rounded-xl flex flex-col justify-between">
+              <span class="text-xs font-bold">Tarde Offline</span>
+              <button onclick="redeem('Tarde Offline', 200)" class="mt-2 accent-btn py-1 rounded-lg text-[10px] font-mono">200 XP</button>
+            </div>
+          </div>
+        </section>
+
+      </aside>
+
+    </div>
+
+  </div>
+
+  <!-- CONTROL DINÁMICO JS (MODO EDICIÓN, TEMAS Y LLAMADAS A API) -->
+  <script>
+    // 1. SELECTOR DE TEMAS CON PERSISTENCIA
+    function setTheme(t) {
+      document.getElementById('html-root').className = t;
+      localStorage.setItem('forge_theme', t);
+    }
+    setTheme(localStorage.getItem('forge_theme') || 'theme-rpg');
+
+    // 2. MODO EDICIÓN REAL CON LAPICITO (SUBIR, BAJAR Y GUARDAR)
+    let isReordering = false;
+    function toggleReorderMode() {
+      isReordering = !isReordering;
+      document.body.classList.toggle('is-reordering', isReordering);
+      const btn = document.getElementById('btn-reorder');
+      btn.innerHTML = isReordering ? '<span>💾 Guardar</span>' : '<span>✏️ Ajustar</span>';
+      if (!isReordering) {
+        saveOrderState();
+        alert('Disposición de módulos guardada con éxito.');
+      }
+    }
+
+    function moveCard(cardId, direction) {
+      const card = document.getElementById(cardId);
+      const parent = card.parentNode;
+      if (direction === -1 && card.previousElementSibling) {
+        parent.insertBefore(card, card.previousElementSibling);
+      } else if (direction === 1 && card.nextElementSibling) {
+        parent.insertBefore(card.nextElementSibling, card);
+      }
+    }
+
+    function saveOrderState() {
+      const cards = Array.from(document.querySelectorAll('#main-vertical-stack .reorderable-card')).map(c => c.id);
+      localStorage.setItem('forge_vertical_order', JSON.stringify(cards));
+    }
+
+    function restoreOrderState() {
+      const saved = localStorage.getItem('forge_vertical_order');
+      if (saved) {
+        try {
+          const order = JSON.parse(saved);
+          const parent = document.getElementById('main-vertical-stack');
+          order.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) parent.appendChild(el);
+          });
+        } catch (e) {}
+      }
+    }
+    restoreOrderState();
+
+    // 3. PESTAÑAS DE MATERIAS
+    function switchSubj(targetId) {
+      document.querySelectorAll('.subj-box').forEach(el => el.classList.add('hidden'));
+      const activeContent = document.getElementById(targetId);
+      if (activeContent) activeContent.classList.remove('hidden');
+
+      // Actualizar estilos de los botones
+      document.querySelectorAll('.subj-tab-btn').forEach(btn => {
+        btn.className = 'subj-tab-btn px-2.5 py-1 rounded-lg text-xs font-mono font-bold inner-box';
+      });
+      const activeBtnId = targetId.replace('subj-', 'btn-subj-');
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.className = 'subj-tab-btn px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[var(--badge-bg)] text-[var(--accent)]';
+      }
+    }
+
+    // 4. COMPLETAR BLOQUE DE RUTINA
+    async function completeBlock(id, label, cat) {
+      const res = await fetch('/api/routine/complete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({block_id: id, label: label, category: cat})
+      });
+      if (res.ok) location.reload();
+    }
+
+    // 5. ACCIÓN EXTRA CON PRUEBA DE TRABAJO (ANTI-MENTIRA)
+    async function submitActionWithProof() {
+      const act = document.getElementById('action-title').value.trim();
+      const expl = document.getElementById('action-expl').value.trim();
+      const type = document.getElementById('action-type').value;
+      if (!act) return alert('Indicá la acción realizada.');
+      const res = await fetch('/api/action/log', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: act, explanation: expl, xp_type: type})
+      });
+      if (res.ok) location.reload();
+    }
+
+    // 6. HÁBITOS (ORACIÓN / LECTURA / ALMUERZO)
+    async function completeHabit(h) {
+      const res = await fetch('/api/habits/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({habit_name: h, details: ''})
+      });
+      if (res.ok) location.reload();
+    }
+
+    // 7. NUTRICIÓN ATLETA (1 AL 10)
+    async function submitNutr() {
+      const score = parseInt(document.getElementById('nutr-select').value);
+      const res = await fetch('/api/nutrition/log', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({score: score, notes: ''})
+      });
+      if (res.ok) location.reload();
+    }
+
+    // 8. GRATITUD NOCTURNA (FILTRO ANTI-REPETICIÓN)
+    async function submitGratitude() {
+      const val = document.getElementById('gratitude-input').value.trim();
+      if (!val) return alert('Escribí tu agradecimiento a Dios.');
+      const res = await fetch('/api/gratitude/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: val})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.feedback);
+        location.reload();
+      } else {
+        alert(data.error);
+      }
+    }
+
+    // 9. CANJE EN TIENDA
+    async function redeem(item, cost) {
+      if (!confirm(`¿Confirmás canjear "${item}" por ${cost} XP?`)) return;
+      const res = await fetch('/api/rewards/redeem', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({item_name: item, cost_xp: cost})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`¡Canje confirmado! 🎉 Disfrutá tu ${data.item}.`);
+        location.reload();
+      } else {
+        alert(data.error || 'XP insuficiente.');
+      }
+    }
+
+    // 10. SUBIDA DIRECTA DE APUNTES / PROGRAMAS PDF
+    async function uploadPdf(input) {
+      if (!input.files || !input.files[0]) return;
+      const formData = new FormData();
+      formData.append('file', input.files[0]);
+      const res = await fetch('/api/subjects/Fisica_II/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        alert('Archivo recibido y guardado en la carpeta de la materia.');
+      } else {
+        alert('Error al subir el archivo.');
+      }
+    }
+
+    async function promptNewSubject() {
+      const name = prompt("Nombre de la nueva materia (ej: Álgebra Lineal):");
+      if (!name) return;
+      const examDate = prompt("Fecha del parcial en formato AAAA-MM-DD (deja vacío si no sabes):");
+      const res = await fetch('/api/subjects/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name, exam_date: examDate || ""})
+      });
+      if (res.ok) {
+        alert(`¡Materia ${name} creada exitosamente con su carpeta de apuntes!`);
+        location.reload();
+      }
+    }
+
+  </script>
+</body>
+</html>

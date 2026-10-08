@@ -1,0 +1,9 @@
+﻿.env
+*.db
+forge.db
+forge_dev.db
+venv/
+__pycache__/
+*.pyc
+uploads/*
+!uploads/.gitkeep
